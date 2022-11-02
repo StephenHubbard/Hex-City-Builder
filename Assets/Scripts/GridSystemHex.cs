@@ -14,23 +14,23 @@ public class GridSystemHex<TGridObject> {
         public int z;
     }
 
-    private int width;
-    private int height;
+    private int gridWidth;
+    private int gridHeight;
     private float cellSize;
     // private Vector3 originPosition;
     private TGridObject[,] gridArray;
 
-    public GridSystemHex(int width, int height, float cellSize,Func<GridSystemHex<TGridObject>, GridPosition, TGridObject> createGridObject) {
-        this.width = width;
-        this.height = height;
+    public GridSystemHex(int gridWidth, int gridHeight, float cellSize,Func<GridSystemHex<TGridObject>, GridPosition, TGridObject> createGridObject) {
+        this.gridWidth = gridWidth;
+        this.gridHeight = gridHeight;
         this.cellSize = cellSize;
         // this.originPosition = originPosition;
 
-        gridArray = new TGridObject[width, height];
+        gridArray = new TGridObject[gridWidth, gridHeight];
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < gridWidth; x++)
         {
-            for (int z = 0; z < height; z++)
+            for (int z = 0; z < gridHeight; z++)
             {
                 GridPosition gridPosition = new GridPosition(x, z);
                 gridArray[x, z] = createGridObject(this, gridPosition);
@@ -38,9 +38,9 @@ public class GridSystemHex<TGridObject> {
         }
 
 
-        bool showDebug = true;
+        bool showDebug = false;
         if (showDebug) {
-            TextMesh[,] debugTextArray = new TextMesh[width, height];
+            TextMesh[,] debugTextArray = new TextMesh[gridWidth, gridHeight];
 
             for (int x = 0; x < gridArray.GetLength(0); x++) {
                 for (int z = 0; z < gridArray.GetLength(1); z++) {
@@ -54,12 +54,12 @@ public class GridSystemHex<TGridObject> {
         }
     }
 
-    public int GetWidth() {
-        return width;
+    public int GetgridWidth() {
+        return gridWidth;
     }
 
-    public int GetHeight() {
-        return height;
+    public int GetgridHeight() {
+        return gridHeight;
     }
 
     public float GetCellSize() {
@@ -80,7 +80,7 @@ public class GridSystemHex<TGridObject> {
     }
 
     public void SetGridObject(int x, int z, TGridObject value) {
-        if (x >= 0 && z >= 0 && x < width && z < height) {
+        if (x >= 0 && z >= 0 && x < gridWidth && z < gridHeight) {
             gridArray[x, z] = value;
             TriggerGridObjectChanged(x, z);
         }
@@ -96,11 +96,17 @@ public class GridSystemHex<TGridObject> {
     }
 
     public TGridObject GetGridObject(int x, int z) {
-        if (x >= 0 && z >= 0 && x < width && z < height) {
+        if (x >= 0 && z >= 0 && x < gridWidth && z < gridHeight) {
             return gridArray[x, z];
         } else {
             return default(TGridObject);
         }
+    }
+
+    public TGridObject GetGridObject(Vector3 worldPosition) {
+        int x, z;
+        GetXZ(worldPosition, out x, out z);
+        return GetGridObject(x, z);
     }
 
     public Vector3 GetWorldPosition(GridPosition gridPosition)
@@ -148,17 +154,36 @@ public class GridSystemHex<TGridObject> {
         return closestGridPosition;
     }
 
+    public List<GridPosition> GetNeighborHexTiles(Vector3 worldPosition) {
+        GridPosition roughXZ = new GridPosition(
+            Mathf.RoundToInt(worldPosition.x / cellSize),
+            Mathf.RoundToInt(worldPosition.z / cellSize / HEX_VERTICAL_OFFSET_MULTIPLIER)
+        );
 
-    public TGridObject GetGridObject(Vector3 worldPosition) {
-        int x, z;
-        GetXZ(worldPosition, out x, out z);
-        return GetGridObject(x, z);
+        bool oddRow = roughXZ.z % 2 == 1;
+
+        List<GridPosition> neighbourGridPositionList = new List<GridPosition>
+        {
+            roughXZ + new GridPosition(-1, 0),
+            roughXZ + new GridPosition(+1, 0),
+
+            roughXZ + new GridPosition(0, +1),
+            roughXZ + new GridPosition(0, -1),
+
+            roughXZ + new GridPosition(oddRow ? +1 : -1, +1),
+            roughXZ + new GridPosition(oddRow ? +1 : -1, -1),
+        };
+
+        return neighbourGridPositionList;
     }
+
+
+    
 
     public Vector2Int ValidateGridPosition(Vector2Int gridPosition) {
         return new Vector2Int(
-            Mathf.Clamp(gridPosition.x, 0, width - 1),
-            Mathf.Clamp(gridPosition.y, 0, height - 1)
+            Mathf.Clamp(gridPosition.x, 0, gridWidth - 1),
+            Mathf.Clamp(gridPosition.y, 0, gridHeight - 1)
         );
     }
 

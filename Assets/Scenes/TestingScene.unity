@@ -352,7 +352,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseColliderLayerMask:
     serializedVersion: 2
-    m_Bits: 2147483647
+    m_Bits: 8
 --- !u!1 &554223376
 GameObject:
   m_ObjectHideFlags: 0
@@ -968,7 +968,7 @@ GameObject:
   - component: {fileID: 1155196267}
   - component: {fileID: 1155196266}
   - component: {fileID: 1155196269}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}

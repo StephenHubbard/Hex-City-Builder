@@ -29,9 +29,18 @@ public class GridBuildingSystem : MonoBehaviour {
 
     private void Update() {
         if (Input.GetMouseButtonDown(1)) {
-            // Debug.Log(grid.GetGridPosition(Mouse3D.GetMouseWorldPosition()));
             GridPosition gridPos = grid.GetGridPosition(Mouse3D.GetMouseWorldPosition());
-            Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetTileHeight());
+            // Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetTileBool());
+            // Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetGridPosition());
+            // Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetTileHeight());
+
+            List<GridPosition> neighbourGridPositionList = GridBuildingSystem.Instance.grid.GetNeighborHexTiles(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetGridPosition());
+
+            foreach (var tile in neighbourGridPositionList)
+            {
+                Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(tile.x, tile.z).GetGridPosition());
+            }
+
         }
     }
 
@@ -52,6 +61,7 @@ public class GridBuildingSystem : MonoBehaviour {
         private bool hasTile = false;
         private GridPosition gridPosition;
         private float tileHeight;
+        private float inheritedParentTileHeight;
 
         public GridObject(GridSystemHex<GridObject> grid, GridPosition gridPosition) {
             this.grid = grid;
@@ -80,6 +90,14 @@ public class GridBuildingSystem : MonoBehaviour {
 
         public float GetTileHeight() {
             return tileHeight;
+        }
+
+        public float GetInheritedParentTileHeight() {
+            return inheritedParentTileHeight;
+        }
+
+        public void SetInheritedParentTileHeight(float inheritedParentTileHeight) {
+            this.inheritedParentTileHeight = inheritedParentTileHeight;
         }
     }
 }

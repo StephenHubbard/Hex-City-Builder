@@ -6,7 +6,6 @@ public class WorldGeneration : MonoBehaviour
 {
     [SerializeField] private GameObject hexLandPrefab;
 
-    private List<GridPosition> allHexTiles = new List<GridPosition>();
 
     void Start()
     {
@@ -21,24 +20,9 @@ public class WorldGeneration : MonoBehaviour
                 if (x == GridBuildingSystem.Instance.gridWidth / 2 && z == GridBuildingSystem.Instance.gridHeight / 2) {
                     GameObject hexTile = Instantiate(hexLandPrefab, GridBuildingSystem.Instance.grid.GetWorldPosition(x, z), hexLandPrefab.transform.rotation);
                     ChangeTileHeight(hexTile, x, z, GridBuildingSystem.Instance.grid.GetGridObject(x, z).GetTileHeight());
-                    SpawnNeighborHexTiles(x, z);
+                    GridBuildingSystem.Instance.grid.GetGridObject(x, z).SetTileHeight(hexTile.transform.localScale.y);
                     ToggleIsOccupiedWithTile(x, z);
                 }
-            }
-        }
-    }
-
-    private void SpawnNeighborHexTiles(int x, int z) {
-        List<GridPosition> neighborTiles;
-
-        neighborTiles = GridBuildingSystem.Instance.grid.GetNeighborHexTiles(GridBuildingSystem.Instance.grid.GetWorldPosition(x, z));
-
-        foreach (var tile in neighborTiles)
-        {
-            if (!GridBuildingSystem.Instance.grid.GetGridObject(tile.x, tile.z).GetTileBool()) { 
-                GameObject hexTile = Instantiate(hexLandPrefab, GridBuildingSystem.Instance.grid.GetWorldPosition(tile.x, tile.z), hexLandPrefab.transform.rotation);
-                ChangeTileHeight(hexTile, tile.x, tile.z, GridBuildingSystem.Instance.grid.GetGridObject(x, z).GetTileHeight());
-                ToggleIsOccupiedWithTile(tile.x, tile.z);
             }
         }
     }
@@ -51,8 +35,10 @@ public class WorldGeneration : MonoBehaviour
         } else if (randomNum == 1) {
             heightChange = -20f;
         }
+
         hexTile.transform.localScale += new Vector3(0, neighborTileHeight + heightChange, 0);
-        if (hexTile.transform.localScale.y <= 1) {
+
+        if (hexTile.transform.localScale.y <= 5) {
             hexTile.transform.localScale = new Vector3(hexTile.transform.localScale.x, 5, hexTile.transform.localScale.z);
         }
         GridBuildingSystem.Instance.grid.GetGridObject(x, z).SetTileHeight(hexTile.transform.localScale.y);
@@ -64,35 +50,45 @@ public class WorldGeneration : MonoBehaviour
     }
 
     public void SpawnNextLayer() {
-        allHexTiles.Clear();
+        List<GridPosition> vacantAndAvailableToSpawnHexTiles = new List<GridPosition>();
+
+        List<GridPosition> currentHexTiles = new List<GridPosition>();
 
         for (int x = 0; x < GridBuildingSystem.Instance.gridWidth; x++)
         {
             for (int z = 0; z < GridBuildingSystem.Instance.gridHeight; z++)
             {
                 if (GridBuildingSystem.Instance.grid.GetGridObject(x, z).GetTileBool()) {
-                    if (!allHexTiles.Contains(GridBuildingSystem.Instance.grid.GetGridObject(x, z).GetGridPosition())) {
-                        allHexTiles.Add(GridBuildingSystem.Instance.grid.GetGridObject(x, z).GetGridPosition());
-                    }
+                    currentHexTiles.Add(GridBuildingSystem.Instance.grid.GetGridObject(x, z).GetGridPosition());
                 }
             }
         }
 
-
-        foreach (var tile in allHexTiles)
+        foreach (var tile in currentHexTiles)
         {
-            SpawnNeighborHexTiles(tile.x, tile.z);
+            List<GridPosition> neighbourGridPositionList = GridBuildingSystem.Instance.grid.GetNeighborHexTiles(GridBuildingSystem.Instance.grid.GetGridObject(tile.x, tile.z).GetGridPosition());
+
+            foreach (var neighborTile in neighbourGridPositionList)
+            {
+                if (!GridBuildingSystem.Instance.grid.GetGridObject(neighborTile.x, neighborTile.z).GetTileBool()) {
+                    if (!vacantAndAvailableToSpawnHexTiles.Contains(GridBuildingSystem.Instance.grid.GetGridObject(neighborTile.x, neighborTile.z).GetGridPosition())) {
+                        GridBuildingSystem.Instance.grid.GetGridObject(neighborTile.x, neighborTile.z).SetInheritedParentTileHeight(GridBuildingSystem.Instance.grid.GetGridObject(tile.x, tile.z).GetTileHeight());
+                        vacantAndAvailableToSpawnHexTiles.Add(GridBuildingSystem.Instance.grid.GetGridObject(neighborTile.x, neighborTile.z).GetGridPosition());
+                    } 
+                } 
+            }
         }
 
-        // StartCoroutine(SpawnNeighborTilesCo());
+        // Debug.Log(vacantAndAvailableToSpawnHexTiles.Count);
 
-    }
-
-    private IEnumerator SpawnNeighborTilesCo() {
-        foreach (var tile in allHexTiles)
+        foreach (var vacantAndAvailableTile in vacantAndAvailableToSpawnHexTiles)
         {
-            SpawnNeighborHexTiles(tile.x, tile.z);
-            yield return new WaitForSeconds(.5f);
+            GameObject hexTile = Instantiate(hexLandPrefab, GridBuildingSystem.Instance.grid.GetWorldPosition(vacantAndAvailableTile.x, vacantAndAvailableTile.z), hexLandPrefab.transform.rotation);
+            ChangeTileHeight(hexTile, vacantAndAvailableTile.x, vacantAndAvailableTile.z, GridBuildingSystem.Instance.grid.GetGridObject(vacantAndAvailableTile.x, vacantAndAvailableTile.z).GetInheritedParentTileHeight());
+
+            ToggleIsOccupiedWithTile(vacantAndAvailableTile.x, vacantAndAvailableTile.z);
+            GridBuildingSystem.Instance.grid.GetGridObject(vacantAndAvailableTile.x, vacantAndAvailableTile.z).SetTileHeight(hexTile.transform.localScale.y);
         }
+        
     }
 }

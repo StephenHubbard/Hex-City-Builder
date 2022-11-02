@@ -38,7 +38,7 @@ public class GridSystemHex<TGridObject> {
         }
 
 
-        bool showDebug = false;
+        bool showDebug = true;
         if (showDebug) {
             TextMesh[,] debugTextArray = new TextMesh[gridWidth, gridHeight];
 
@@ -154,24 +154,24 @@ public class GridSystemHex<TGridObject> {
         return closestGridPosition;
     }
 
-    public List<GridPosition> GetNeighborHexTiles(Vector3 worldPosition) {
-        GridPosition roughXZ = new GridPosition(
-            Mathf.RoundToInt(worldPosition.x / cellSize),
-            Mathf.RoundToInt(worldPosition.z / cellSize / HEX_VERTICAL_OFFSET_MULTIPLIER)
-        );
+    public List<GridPosition> GetNeighborHexTiles(GridPosition gridPosition) {
+        // GridPosition roughXZ = new GridPosition(
+        //     Mathf.RoundToInt(gridPosition.x / cellSize),
+        //     Mathf.RoundToInt(gridPosition.z / cellSize / HEX_VERTICAL_OFFSET_MULTIPLIER)
+        // );
 
-        bool oddRow = roughXZ.z % 2 == 1;
+        bool oddRow = gridPosition.z % 2 == 1;
 
         List<GridPosition> neighbourGridPositionList = new List<GridPosition>
         {
-            roughXZ + new GridPosition(-1, 0),
-            roughXZ + new GridPosition(+1, 0),
+            gridPosition + new GridPosition(-1, 0),
+            gridPosition + new GridPosition(+1, 0),
 
-            roughXZ + new GridPosition(0, +1),
-            roughXZ + new GridPosition(0, -1),
+            gridPosition + new GridPosition(0, +1),
+            gridPosition + new GridPosition(0, -1),
 
-            roughXZ + new GridPosition(oddRow ? +1 : -1, +1),
-            roughXZ + new GridPosition(oddRow ? +1 : -1, -1),
+            gridPosition + new GridPosition(oddRow ? +1 : -1, +1),
+            gridPosition + new GridPosition(oddRow ? +1 : -1, -1),
         };
 
         return neighbourGridPositionList;

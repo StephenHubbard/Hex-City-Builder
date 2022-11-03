@@ -14,6 +14,7 @@ public class GridBuildingSystem : MonoBehaviour {
     public int gridWidth = 10;
     public int gridHeight = 10;
     public float cellSize = 10f;
+    [SerializeField] private bool showHexVisuals = true;
 
     public GridSystemHex<GridObject> grid;
 
@@ -24,7 +25,10 @@ public class GridBuildingSystem : MonoBehaviour {
     }
 
     private void Start() {
-        SpawnHexVisuals();
+        if (showHexVisuals) {
+            SpawnHexVisuals();
+        }
+
     }
 
     private void Update() {
@@ -34,13 +38,14 @@ public class GridBuildingSystem : MonoBehaviour {
             // Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetGridPosition());
             // Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetTileHeight());
 
-            List<GridPosition> neighbourGridPositionList = GridBuildingSystem.Instance.grid.GetNeighborHexTiles(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetGridPosition());
+            // List<GridPosition> neighbourGridPositionList = GridBuildingSystem.Instance.grid.GetNeighborHexTiles(GridBuildingSystem.Instance.grid.GetGridObject(gridPos.x, gridPos.z).GetGridPosition());
 
-            foreach (var tile in neighbourGridPositionList)
-            {
-                Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(tile.x, tile.z).GetGridPosition());
-            }
+            // foreach (var tile in neighbourGridPositionList)
+            // {
+            //     Debug.Log(GridBuildingSystem.Instance.grid.GetGridObject(tile.x, tile.z).GetGridPosition());
+            // }
 
+            WorldGeneration.instance.FindAverageHeightOfSurroundingTiles(gridPos.x, gridPos.z);
         }
     }
 

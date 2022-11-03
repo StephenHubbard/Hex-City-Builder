@@ -17,14 +17,12 @@ public class GridSystemHex<TGridObject> {
     private int gridWidth;
     private int gridHeight;
     private float cellSize;
-    // private Vector3 originPosition;
     private TGridObject[,] gridArray;
 
     public GridSystemHex(int gridWidth, int gridHeight, float cellSize,Func<GridSystemHex<TGridObject>, GridPosition, TGridObject> createGridObject) {
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
         this.cellSize = cellSize;
-        // this.originPosition = originPosition;
 
         gridArray = new TGridObject[gridWidth, gridHeight];
 
@@ -38,7 +36,7 @@ public class GridSystemHex<TGridObject> {
         }
 
 
-        bool showDebug = true;
+        bool showDebug = false;
         if (showDebug) {
             TextMesh[,] debugTextArray = new TextMesh[gridWidth, gridHeight];
 
@@ -155,10 +153,6 @@ public class GridSystemHex<TGridObject> {
     }
 
     public List<GridPosition> GetNeighborHexTiles(GridPosition gridPosition) {
-        // GridPosition roughXZ = new GridPosition(
-        //     Mathf.RoundToInt(gridPosition.x / cellSize),
-        //     Mathf.RoundToInt(gridPosition.z / cellSize / HEX_VERTICAL_OFFSET_MULTIPLIER)
-        // );
 
         bool oddRow = gridPosition.z % 2 == 1;
 
